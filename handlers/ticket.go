@@ -4,7 +4,7 @@ import (
     "html/template"
     "net/http"
     "proyek1-be/models"
-    "log"
+    // "log"
     "fmt"
     "strconv"
 )
@@ -19,10 +19,34 @@ var templates = template.Must(template.New("").Funcs(template.FuncMap{
 }).ParseGlob("templates/*.html"))
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-    if err := templates.ExecuteTemplate(w, "index.html", nil); err != nil {
+    ticketStocks, err := models.GetAllTicketStocks()
+    if err != nil {
+        http.Error(w, "Unable to fetch ticket stocks", http.StatusInternalServerError)
+        return
+    }
+
+    data := struct {
+        StockRegular int
+        StockPremium int
+        StockVIP     int
+    }{}
+
+    for _, ticketStock := range ticketStocks {
+        switch ticketStock.Event {
+        case "regular":
+            data.StockRegular = ticketStock.Stock
+        case "premium":
+            data.StockPremium = ticketStock.Stock
+        case "vip":
+            data.StockVIP = ticketStock.Stock
+        }
+    }
+
+    if err := templates.ExecuteTemplate(w, "index.html", data); err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }
 }
+
 
 func BookTicketHandler(w http.ResponseWriter, r *http.Request) {
     if err := r.ParseForm(); err != nil {
@@ -35,32 +59,39 @@ func BookTicketHandler(w http.ResponseWriter, r *http.Request) {
     event := r.FormValue("event")
     quantityStr := r.FormValue("quantity")
 
-    log.Println("Received event:", event)
-
     var pricePerTicket float64
     var quantity int
     var err error
 
-    // Convert quantity to int
     if quantity, err = strconv.Atoi(quantityStr); err != nil || quantity < 1 {
         http.Error(w, "Invalid quantity", http.StatusBadRequest)
         return
     }
 
-    // Set harga otomatis berdasarkan event
+    ticketStock, err := models.GetTicketStockByEvent(event)
+    if err != nil || ticketStock.Stock < quantity {
+        http.Error(w, "Not enough tickets available", http.StatusBadRequest)
+        return
+    }
+
     switch event {
     case "regular":
-        pricePerTicket = 1000000.0 // 1 juta
+        pricePerTicket = 1000000.0
     case "premium":
-        pricePerTicket = 1500000.0 // 1,5 juta
+        pricePerTicket = 1500000.0
     case "vip":
-        pricePerTicket = 2500000.0 // 2,5 juta
+        pricePerTicket = 2500000.0
     default:
         http.Error(w, "Invalid event", http.StatusBadRequest)
         return
     }
 
     totalPrice := pricePerTicket * float64(quantity)
+
+    if err := models.UpdateTicketStock(event, quantity); err != nil {
+        http.Error(w, "Unable to update stock", http.StatusInternalServerError)
+        return
+    }
 
     ticket := models.Ticket{
         Name:      name,
@@ -79,3 +110,6 @@ func BookTicketHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }
 }
+
+
+
