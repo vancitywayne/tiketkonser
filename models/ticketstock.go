@@ -3,6 +3,7 @@ package models
 import (
     "proyek1-be/database"
     "log"
+    "fmt"
 )
 
 type TicketStock struct {
@@ -25,11 +26,25 @@ func GetTicketStockByEvent(event string) (*TicketStock, error) {
 
 func UpdateTicketStock(event string, quantity int) error {
     db := database.GetDB()
-    _, err := db.Exec("UPDATE ticket_stocks SET stock = stock - ? WHERE event = ? AND stock >= ?", quantity, event, quantity)
+    result, err := db.Exec("UPDATE ticket_stocks SET stock = stock - ? WHERE event = ? AND stock >= ?", quantity, event, quantity)
     if err != nil {
         log.Printf("Error updating ticket stock in database: %v", err)
+        return err
     }
-    return err
+
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        log.Printf("Error getting rows affected: %v", err)
+        return err
+    }
+
+    if rowsAffected == 0 {
+        log.Printf("No rows updated, possibly due to insufficient stock")
+        return fmt.Errorf("insufficient stock for event: %s", event)
+    }
+
+    log.Printf("Stock updated successfully for event: %s, quantity: %d", event, quantity)
+    return nil
 }
 
 func GetAllTicketStocks() ([]TicketStock, error) {

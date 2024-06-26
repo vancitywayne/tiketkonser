@@ -4,7 +4,7 @@ import (
     "html/template"
     "net/http"
     "proyek1-be/models"
-    // "log"
+    "log"
     "fmt"
     "strconv"
 )
@@ -44,6 +44,26 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     if err := templates.ExecuteTemplate(w, "index.html", data); err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+}
+
+func FormHandler(w http.ResponseWriter, r *http.Request) {
+    ticketStocks, err := models.GetAllTicketStocks()
+    if err != nil {
+        log.Printf("Error fetching ticket stocks: %v", err)
+        http.Error(w, "Unable to fetch ticket stocks", http.StatusInternalServerError)
+        return
+    }
+
+    data := struct {
+        Stocks []models.TicketStock
+    }{
+        Stocks: ticketStocks,
+    }
+
+    if err := templates.ExecuteTemplate(w, "form.html", data); err != nil {
+        log.Printf("Error rendering form template: %v", err)
+        http.Error(w, "Unable to render form", http.StatusInternalServerError)
     }
 }
 
@@ -105,6 +125,8 @@ func BookTicketHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Unable to book ticket", http.StatusInternalServerError)
         return
     }
+
+
 
     if err := templates.ExecuteTemplate(w, "success.html", ticket); err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)

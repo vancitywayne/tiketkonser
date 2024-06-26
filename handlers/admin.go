@@ -9,6 +9,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
+
+type DashboardData struct {
+    Tickets     []models.Ticket
+    TicketStocks []models.TicketStock
+}
+
+var adminTemplates = template.Must(template.New("").Funcs(template.FuncMap{
+    "FormatRupiah": FormatRupiah,
+}).ParseGlob("templates/*.html"))
+
 func AdminDashboardHandler(w http.ResponseWriter, r *http.Request) {
     tickets, err := models.GetAllTickets()
     if err != nil {
@@ -17,8 +27,21 @@ func AdminDashboardHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    templates := template.Must(template.ParseFiles("templates/dashboard.html"))
-    if err := templates.ExecuteTemplate(w, "dashboard.html", tickets); err != nil {
+    ticketStocks, err := models.GetAllTicketStocks()
+    if err != nil {
+        log.Printf("Error fetching ticket stocks: %v", err)
+        http.Error(w, "Unable to fetch ticket stocks", http.StatusInternalServerError)
+        return
+    }
+
+    data := DashboardData{
+        Tickets:     tickets,
+        TicketStocks: ticketStocks,
+    }
+
+    log.Printf("Dashboard data: %+v", data) // Logging the data to check it
+
+    if err := templates.ExecuteTemplate(w, "dashboard.html", data); err != nil {
         log.Printf("Error rendering template: %v", err)
         http.Error(w, "Unable to render template", http.StatusInternalServerError)
     }
@@ -29,8 +52,10 @@ func CreateTicketHandler(w http.ResponseWriter, r *http.Request) {
         name := r.FormValue("name")
         email := r.FormValue("email")
         event := r.FormValue("event")
+        quantity, _ := strconv.Atoi(r.FormValue("quantity"))
+        totalPrice, _ := strconv.ParseFloat(r.FormValue("total_price"), 64)
 
-        ticket := models.Ticket{Name: name, Email: email, Event: event}
+        ticket := models.Ticket{Name: name, Email: email, Event: event, Quantity: quantity, TotalPrice: totalPrice}
         if err := ticket.Save(); err != nil {
             log.Printf("Error creating ticket: %v", err)
             http.Error(w, "Unable to create ticket", http.StatusInternalServerError)
@@ -54,8 +79,25 @@ func UpdateTicketHandler(w http.ResponseWriter, r *http.Request) {
         name := r.FormValue("name")
         email := r.FormValue("email")
         event := r.FormValue("event")
+        quantity, _ := strconv.Atoi(r.FormValue("quantity"))
 
-        ticket := models.Ticket{ID: id, Name: name, Email: email, Event: event}
+        var pricePerTicket float64
+
+        switch event {
+        case "regular":
+            pricePerTicket = 1000000.0
+        case "premium":
+            pricePerTicket = 1500000.0
+        case "vip":
+            pricePerTicket = 2500000.0
+        default:
+            http.Error(w, "Invalid event", http.StatusBadRequest)
+            return
+        }
+
+        totalPrice := pricePerTicket * float64(quantity)
+
+        ticket := models.Ticket{ID: id, Name: name, Email: email, Event: event, Quantity: quantity, TotalPrice: totalPrice}
         if err := ticket.Update(); err != nil {
             log.Printf("Error updating ticket: %v", err)
             http.Error(w, "Unable to update ticket", http.StatusInternalServerError)
