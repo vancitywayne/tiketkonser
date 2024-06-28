@@ -47,6 +47,27 @@ func AdminDashboardHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func StockDashboardHandler(w http.ResponseWriter, r *http.Request) {
+
+    ticketStocks, err := models.GetAllTicketStocks()
+    if err != nil {
+        log.Printf("Error fetching ticket stocks: %v", err)
+        http.Error(w, "Unable to fetch ticket stocks", http.StatusInternalServerError)
+        return
+    }
+
+    data := DashboardData{
+        TicketStocks: ticketStocks,
+    }
+
+    log.Printf("Dashboard data: %+v", data) // Logging the data to check it
+
+    if err := templates.ExecuteTemplate(w, "ticket-stocks.html", data); err != nil {
+        log.Printf("Error rendering template: %v", err)
+        http.Error(w, "Unable to render template", http.StatusInternalServerError)
+    }
+}
+
 func CreateTicketHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == http.MethodPost {
         name := r.FormValue("name")

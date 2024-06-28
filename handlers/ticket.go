@@ -1,7 +1,7 @@
 package handlers
 
 import (
-    "html/template"
+    // "html/template"
     "net/http"
     "proyek1-be/models"
     "log"
@@ -12,11 +12,6 @@ import (
 func FormatRupiah(price float64) string {
     return fmt.Sprintf("Rp %.2f", price)
 }
-
-// Load templates with custom functions
-var templates = template.Must(template.New("").Funcs(template.FuncMap{
-    "FormatRupiah": FormatRupiah,
-}).ParseGlob("templates/*.html"))
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
     ticketStocks, err := models.GetAllTicketStocks()

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Admin Dashboard - Company Name</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        /* Custom styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #343a40;
+            padding-top: 15px;
+            color: #fff;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .sidebar-heading {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .sidebar-item {
+            padding: 10px;
+        }
+        .sidebar-item a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .sidebar-item a:hover {
+            text-decoration: underline;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4 class="sidebar-heading">Tiket Kita</h4>
+        <div class="sidebar-item">
+            <a href="/admin/dashboard" class="btn btn-dark btn-block">Booked Tickets</a>
+        </div>
+        <div class="sidebar-item">
+            <a href="/admin/ticket-stocks" class="btn btn-dark btn-block">Ticket Stocks</a>
+        </div>
+        <div class="sidebar-item">
+            <a href="/admin/settings" class="btn btn-dark btn-block">Settings</a>
+        </div>
+        <div class="sidebar-item">
+            <a href="/logout" class="btn btn-dark btn-block">Logout</a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <h2 class="mb-4">Admin Dashboard</h2>
+
+        <!-- Ticket Stocks -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title">Ticket Stocks</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .TicketStocks}}
+                            <tr>
+                                <td>{{.Event}}</td>
+                                <td>{{.Stock}}</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>
