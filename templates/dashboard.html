@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    <title>Admin Dashboard - Company Name</title>
+    <title>Admin Dashboard</title>
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -29,15 +29,16 @@
       }
       .sidebar-heading {
         font-size: 1.2rem;
-        text-align: center;
         margin-bottom: 20px;
+        padding-left: 15px;
       }
       .sidebar-item {
-        padding: 10px;
+        padding: 10px 15px;
       }
       .sidebar-item a {
         color: #fff;
         text-decoration: none;
+        display: block;
       }
       .sidebar-item a:hover {
         text-decoration: underline;
@@ -53,20 +54,16 @@
     <div class="sidebar">
       <h4 class="sidebar-heading">Tiket Kita</h4>
       <div class="sidebar-item">
-        <a href="/admin/dashboard" class="btn btn-dark btn-block"
-          >Booked Tickets</a
-        >
+        <a href="/admin/dashboard">Booked Tickets</a>
       </div>
       <div class="sidebar-item">
-        <a href="/admin/ticket-stocks" class="btn btn-dark btn-block"
-          >Ticket Stocks</a
-        >
+        <a href="/admin/ticket-stocks">Ticket Stocks</a>
       </div>
       <div class="sidebar-item">
-        <a href="/admin/settings" class="btn btn-dark btn-block">Settings</a>
+        <a href="/admin/settings">Settings</a>
       </div>
       <div class="sidebar-item">
-        <a href="/logout" class="btn btn-dark btn-block">Logout</a>
+        <a href="/logout">Logout</a>
       </div>
     </div>
 
@@ -135,11 +132,10 @@
                       class="btn btn-sm btn-warning"
                       >Edit</a
                     >
-                    <a
-                      href="/admin/delete/{{.ID}}"
-                      class="btn btn-sm btn-danger"
-                      >Delete</a
-                    >
+                    <form action="/admin/delete/{{.ID}}" method="post" style="display:inline;">
+                      <input type="hidden" name="_method" value="DELETE">
+                      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
                   </td>
                 </tr>
                 {{end}}

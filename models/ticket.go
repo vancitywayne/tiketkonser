@@ -64,13 +64,14 @@ func GetAllTickets() ([]Ticket, error) {
     return tickets, nil
 }
 
-func DeleteTicket(id int) error {
+func DeleteTicket(ticketID string) error {
     db := database.GetDB()
-    _, err := db.Exec("DELETE FROM tickets WHERE id=?", id)
+    _, err := db.Exec("DELETE FROM tickets WHERE id = ?", ticketID)
     if err != nil {
         log.Printf("Error deleting ticket from database: %v", err)
+        return err
     }
-    return err
+    return nil
 }
 
 // func GetTicketStock() (int, error) {

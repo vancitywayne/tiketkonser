@@ -137,17 +137,20 @@ func UpdateTicketHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTicketHandler(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    id, err := strconv.Atoi(vars["id"])
-    if err != nil {
-        http.Error(w, "Invalid ticket ID", http.StatusBadRequest)
-        return
-    }
+    if r.Method == http.MethodPost {
+        vars := mux.Vars(r)
+        ticketID := vars["id"]
 
-    if err := models.DeleteTicket(id); err != nil {
-        log.Printf("Error deleting ticket: %v", err)
-        http.Error(w, "Unable to delete ticket", http.StatusInternalServerError)
-        return
+        err := models.DeleteTicket(ticketID)
+        if err != nil {
+            log.Printf("Error deleting ticket: %v", err)
+            http.Error(w, "Unable to delete ticket", http.StatusInternalServerError)
+            return
+        }
+
+        http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
+    } else {
+        http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
     }
-    http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
 }
+
